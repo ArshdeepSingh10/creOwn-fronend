@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "name": "Trolley Wheel",
+    "description": "A high-end smartphone with a stunning display and powerful processor.",
+    "category": "Trolley Wheel",
+    "image": "1.png",
+    "productInfo": {
+      "Load capacity": "30-40kg/- pre Wheel",
+      "Color": "white",
+      "Matrial": "Nylone",
+      "Type": "Moving Type",
+      "Dimension": "2-inch (50x25mm)"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Trolley Wheel",
+    "description": "A lightweight laptop with a sleek design and long battery life.",
+    "category": "Trolley Wheel",
+    "image": "5.png",
+    "productInfo": {
+      "Load capacity": "30-40kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Break Type",
+      "Matrial": "Nylone",
+      "Dimension": "2-inch (50x25mm)"
+    }
+  },
+  {
+    "id": 3,
+    "name": "PU Trolley Wheel",
+    "description": "Noise-cancelling wireless headphones with superior sound quality.",
+    "category": "PU Trolley Wheel",
+    "image": "9.png",
+    "productInfo": {
+      "Load capacity": "30-40kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Moving Type",
+      "Matrial": "plactic",
+      "Dimension": "2-inch (50x25mm)"
+    }
+  },
+  {
+    "id": 4,
+    "name": "PU Trolley Wheel",
+    "description": "Noise-cancelling wireless headphones with superior sound quality.",
+    "category": "PU Trolley Wheel",
+    "image": "9.png",
+    "productInfo": {
+      "Load capacity": "30-40kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Break Type",
+      "Matrial": "plactic",
+      "Dimension": "2-inch (50x25mm)"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Trolley Wheel",
+    "description": "Noise-cancelling wireless headphones with superior sound quality.",
+    "category": "Trolley Wheel",
+    "image": "9.png",
+    "productInfo": {
+      "Load capacity": "25kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Moving Type",
+      "Matrial": "plactic",
+      "Dimension": "2-inch (50x25mm)"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Fixed Type Nylone Wheel",
+    "description": "Noise-cancelling wireless headphones with superior sound quality.",
+    "category": "Trolley Wheel",
+    "image": "9.png",
+    "productInfo": {
+      "Load capacity": "80-90kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Fixed Type",
+      "Matrial": "plactic",
+      "Dimension": "3-inch (75x32mm)"
+    }
+  },
+  {
+    "id": 7,
+    "name": "Moving Type Nylone Wheel",
+    "description": "Noise-cancelling wireless headphones with superior sound quality.",
+    "category": "Trolley Wheel",
+    "image": "9.png",
+    "productInfo": {
+      "Load capacity": "80-90kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Moving Type",
+      "Matrial": "plactic",
+      "Dimension": "3-inch (75x32mm)"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Break Type Nylone Wheel",
+    "description": "Noise-cancelling wireless headphones with superior sound quality.",
+    "category": "PU Trolley Wheel",
+    "image": "9.png",
+    "productInfo": {
+      "Load capacity": "80-90kg/- pre Wheel",
+      "Brand": "chawla",
+      "Type": "Break Type",
+      "Matrial": "plactic",
+      "Dimension": "3-inch (75x32mm)"
+    }
+  },
+  {
+    "id": 5,
+    "name": "4K Television",
+    "description": "A 55-inch 4K UHD television with HDR support and smart TV capabilities.",
+    "category": "Conecter",
+    "image": "32.png",
+    "productInfo": {
+      "Load capacity": "120-300kg",
+      "Brand": "chawla",
+      "Color": "white",
+      "Matrial": "plactic",
+      "Dimension": "12cm"
+    }
+  },
+  {
+    "id": 6,
+    "name": "4K Television",
+    "description": "A 55-inch 4K UHD television with HDR support and smart TV capabilities.",
+    "category": "Knobs",
+    "image": "23.png",
+    "productInfo": {
+      "Load capacity": "120-300kg",
+      "Brand": "chawla",
+      "Color": "white",
+      "Matrial": "plactic",
+      "Dimension": "12cm"
+    }
+  }
+]

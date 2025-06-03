@@ -1,0 +1,53 @@
+
+
+.location h3 {
+    margin-top: 0;
+}
+
+.social-community {
+    text-align: center;
+    background-color: #00a2ff;
+    padding: 10px 0;
+}
+.social-community a {
+    color: white;
+    text-decoration: none;
+    margin: 0 1px;
+}
+
+  .social-link {
+    background-color: rgba(218, 216, 216, 0.2); /* Set background with opacity */
+    padding: 4px 25px;
+    color: white; /* Ensure text color is bright white */
+    text-decoration: none;
+    margin: 0 10px;
+    display: inline-block;
+  }
+  
+.footer {
+    background-color: #000000;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+.backgroundImg {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.9)), url('../../public/Images/pexels-lkloeppel-466685.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* .banner-bg{
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(63, 149, 175, 0.5)), url('../../public/Images/bannertest.png');
+   background-size: contain;
+  background-position: right; 
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
+ 
+} */
+@media (max-width: 768px) {
+  .banner-bg {
+    background-blend-mode:normal;
+ 
+    
+  }
+}
