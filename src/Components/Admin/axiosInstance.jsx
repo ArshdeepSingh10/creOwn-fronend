@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://backend-8m9u.vercel.app/api',
-  withCredentials : true,
+  baseURL: 'https://creown-backend.onrender.com', 
   headers: {
     'Content-Type': 'application/json',
   },
