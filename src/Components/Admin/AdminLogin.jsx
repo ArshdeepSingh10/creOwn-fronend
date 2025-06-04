@@ -39,7 +39,7 @@ const AdminLogin = () => {
   };
   const checkAuth = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/check-auth', {
+      const response = await axios.get('https://creown-backend.onrender.com/check-auth', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
