@@ -9,7 +9,7 @@ const Product = ({ companyInfo }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/productsUser/${uniqueName}`);
+        const response = await axios.get(`https://creown-backend.onrender.com/api/productsUser/${uniqueName}`);
         setProducts(response.data.slice(0, 6)); // Take only the top 10 products
       } catch (error) {
         console.error('There was an error fetching the products!', error);

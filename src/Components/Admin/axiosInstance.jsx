@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://creown-backend.onrender.com', 
+  baseURL: 'https://creown-backend.onrender.com/api', 
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

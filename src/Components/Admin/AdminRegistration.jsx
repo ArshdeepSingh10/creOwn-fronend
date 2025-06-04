@@ -22,7 +22,7 @@ export default function AdminRegistration  () {
     }
 
     try {
-      await axios.post('http://localhost:3001/api/admin/register', { email, password });
+      await axios.post('https://creown-backend.onrender.com/api/admin/register', { email, password });
       setSuccess('Registration successful! Redirecting to login...');
       localStorage.removeItem('token');
       setTimeout(() => {

@@ -13,7 +13,7 @@ const { uniqueName } = useParams();
     const fetchProducts = async () => {
       console.log(uniqueName);
       try {
-        const response = await axios.get(`http://localhost:3001/api/productsUser/${uniqueName}`);
+        const response = await axios.get(`https://creown-backend.onrender.com/api/productsUser/${uniqueName}`);
         const filteredProducts = category
           ? response.data.filter(product => product.category === category)
           : response.data;

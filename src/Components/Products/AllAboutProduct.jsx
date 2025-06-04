@@ -14,7 +14,7 @@ const AllAboutProduct = () => {
       try {
         console.log(id)
         const response = await axios.get(
-          `http://localhost:3001/api/products/${id}`
+          `https://creown-backend.onrender.com/api/products/${id}`
         );
         console.log(response.data);
         setProduct(response.data);
