@@ -14,7 +14,7 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3001/api/admin/login', { email, password });
+      const response = await axios.post('https://creown-backend.onrender.com/api/admin/login', { email, password });
 
       const { token } = response.data;
 
