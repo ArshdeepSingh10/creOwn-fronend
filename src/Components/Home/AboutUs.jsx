@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axiosInstance from "../../yourAxiosInstanceFile"; // Adjust as needed
+import axiosInstance from "../Admin/axiosInstance"; // Adjust as needed
 
 const AboutUs = ({ companyInfo: initialCompanyInfo }) => {
   const { company } = useParams();
