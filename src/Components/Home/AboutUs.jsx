@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 const AboutUs = ({ companyInfo }) => {
    const { company } = useParams();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState(companyInfo);
   const [shortDescriptionLength, setShortDescriptionLength] = useState(750);
 
   const toggleReadMore = () => {
