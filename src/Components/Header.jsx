@@ -12,7 +12,7 @@ export const Header = ({ companyInfo }) => {
 
   const handleContactUsClick = () => {
     console.log('working ')
-    navigate("/", { state: { scrollToBottom: true } });
+    navigate(`${uniqueName}`, { state: { scrollToBottom: true } });
   };
 
   const toggleMenu = () => {
