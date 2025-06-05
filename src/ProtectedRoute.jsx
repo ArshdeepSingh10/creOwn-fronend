@@ -14,10 +14,10 @@ const ProtectedRoute = ({ children }) => {
         }
       });
       if (response.status === 200) {
-        alert("1")
+       
         setIsAuthenticated(true);
       } else {
-        alert("3")
+       
 
         setIsAuthenticated(false);
       }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-
+import { useParams } from "react-router-dom";
 const AboutUs = ({ companyInfo }) => {
+   const { company } = useParams();
   const [isExpanded, setIsExpanded] = useState(false);
   const [shortDescriptionLength, setShortDescriptionLength] = useState(750);
 
@@ -23,7 +24,22 @@ const AboutUs = ({ companyInfo }) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
+useEffect(()=>{
+   const fetchCompanyInfo = async () => {
+      try {
+        const response = await axiosInstance.get(`/company/unique/${company}`);
+       console.log(response)
+        setCompanyInfo(response.data);
+      } catch (error) {
+        console.error('Error fetching company info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+   if (company && companyInfo == null) {
+      fetchCompanyInfo();
+    }
+},[company])
   const shortDescription = description.substring(0, shortDescriptionLength) + '...';
 
   return (
