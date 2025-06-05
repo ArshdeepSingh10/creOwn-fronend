@@ -40,13 +40,15 @@ const AddProducts = ({ initialData = null }) => {
     color: "",
     mainImageFile: null,
     otherImageFiles: [],
+    mainImagePreview: "", // New state for main image preview
+    otherImagePreviews: [], // New state for other images preview
   });
   const [categoryList, setCategoryList] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [customFields, setCustomFields] = useState([]);
   const [newCustomField, setNewCustomField] = useState({ key: "", value: "" });
-  
+
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -57,21 +59,27 @@ const AddProducts = ({ initialData = null }) => {
         console.log(response.data);
         setCategoryList(response.data);
       } catch (error) {
-        if (error.response?.status === 403 && error.response?.data?.error === 'No company found for this admin') {
+        if (
+          error.response?.status === 403 &&
+          error.response?.data?.error === "No company found for this admin"
+        ) {
           console.log("Redirecting to EditPage because no company exists");
-          navigate('/admin/EditPage');
+          navigate("/admin/EditPage");
         }
         console.error("Error fetching categories:", error);
       }
     };
-  
+
     fetchCategories();
     if (initialData) {
       setFormData({
         ...initialData,
         mainImageFile: null,
         otherImageFiles: [],
+        mainImagePreview: initialData.mainImage || "",
+        otherImagePreviews: initialData.otherImages || [],
       });
+      setCustomFields(initialData.customFields || []);
     } else if (id) {
       const fetchProduct = async () => {
         try {
@@ -80,21 +88,36 @@ const AddProducts = ({ initialData = null }) => {
             ...response.data,
             mainImageFile: null,
             otherImageFiles: [],
+            mainImagePreview: response.data.mainImage || "",
+            otherImagePreviews: response.data.otherImages || [],
           });
+          setCustomFields(response.data.customFields || []);
         } catch (error) {
           console.error("Error fetching product:", error);
         }
       };
       fetchProduct();
     }
-  }, [initialData, id]);
+  }, [initialData, id, navigate]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "mainImageFile") {
-      setFormData({ ...formData, [name]: files[0] });
+      setFormData({
+        ...formData,
+        [name]: files[0],
+        mainImagePreview: URL.createObjectURL(files[0]),
+      });
     } else if (name === "otherImageFiles") {
-      setFormData({ ...formData, [name]: Array.from(files) });
+      const newFiles = Array.from(files);
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: [...prevFormData.otherImageFiles, ...newFiles],
+        otherImagePreviews: [
+          ...prevFormData.otherImagePreviews,
+          ...newFiles.map((file) => URL.createObjectURL(file)),
+        ],
+      }));
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -131,39 +154,66 @@ const AddProducts = ({ initialData = null }) => {
       console.error("Error deleting category:", error);
     }
   };
+
   const handleAddCustomField = () => {
     if (newCustomField.key.trim() && newCustomField.value.trim()) {
       setCustomFields([...customFields, newCustomField]);
       setNewCustomField({ key: "", value: "" });
     }
   };
-  
+
   const handleRemoveCustomField = (index) => {
     setCustomFields(customFields.filter((_, i) => i !== index));
   };
-  
+
+  const handleRemoveOtherImage = (index) => {
+    setFormData((prevFormData) => {
+      const updatedFiles = [...prevFormData.otherImageFiles];
+      const updatedPreviews = [...prevFormData.otherImagePreviews];
+
+      // If the image to be removed is a newly selected file (not yet uploaded)
+      if (updatedFiles[index] && updatedPreviews[index].startsWith('blob:')) {
+        updatedFiles.splice(index, 1);
+        updatedPreviews.splice(index, 1);
+      } else {
+        // If it's an already existing image URL, remove it from previews only
+        // It will be handled in the submission logic to not include it
+        updatedPreviews.splice(index, 1);
+      }
+      return {
+        ...prevFormData,
+        otherImageFiles: updatedFiles,
+        otherImagePreviews: updatedPreviews,
+      };
+    });
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.mainImageFile) {
+    if (!formData.mainImageFile && !formData.mainImagePreview) {
       alert("Main product image is required.");
       return;
     }
 
-    if (formData.otherImageFiles.length === 0) {
+    if (formData.otherImageFiles.length === 0 && formData.otherImagePreviews.length === 0) {
       alert("At least one other product image is required.");
       return;
     }
 
     setIsLoading(true);
     try {
-      let mainImageUrl = "";
-      let otherImageUrls = [];
+      let mainImageUrl = formData.mainImagePreview; // Start with existing main image URL
+      let otherImageUrls = [...formData.otherImagePreviews]; // Start with existing other image URLs
+
       if (formData.mainImageFile) {
         mainImageUrl = await uploadImageToCloudinary(formData.mainImageFile);
       }
-      if (formData.otherImageFiles.length > 0) {
-        for (const file of formData.otherImageFiles) {
+
+      // Upload new other images and append to existing ones
+      for (const file of formData.otherImageFiles) {
+        if (file instanceof File) { // Only upload actual file objects, not existing URLs
           const url = await uploadImageToCloudinary(file);
           otherImageUrls.push(url);
         }
@@ -190,7 +240,7 @@ const AddProducts = ({ initialData = null }) => {
         await axiosInstance.post("/add-product", productData);
         toast.success("Product added successfully!");
       }
-     // navigate("/products");
+      // navigate("/products"); // Uncomment this if you want to navigate after success
     } catch (error) {
       toast.error("There was an error adding/updating the product!");
       console.error("There was an error adding/updating the product!", error);
@@ -233,21 +283,22 @@ const AddProducts = ({ initialData = null }) => {
               </div>
               <ul className="mt-4 bg-white p-3 rounded-md">
                 {categoryList.map((cat) => (
-                 
-                    <li
-                      key={cat.id}
-                      className="flex items-center justify-between mb-2 px-3 "
+                  <li
+                    key={cat.id}
+                    className="flex items-center justify-between mb-2 px-3 "
+                  >
+                    {cat.name}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat.name)}
+                      className="text-end hover:text-red-900"
                     >
-                      {cat.name}
-                      <button
-                    type="button"
-                    onClick={() => handleDeleteCategory(cat.name)}
-                    className="text-end hover:text-red-900"
-                  > <span className="text-red-500">
+                      {" "}
+                      <span className="text-red-500">
                         <FontAwesomeIcon icon={faTrash} />
-                      </span></button>
-                    </li>
-                 
+                      </span>
+                    </button>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -284,42 +335,6 @@ const AddProducts = ({ initialData = null }) => {
                       />
                     </div>
                   </div>
-                  {/* <div className="w-full lg:w-6/12 px-4">
-                    <div className="relative w-full mb-3">
-                      <label
-                        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                        htmlFor="loadCapacity"
-                      >
-                        Load Capacity
-                      </label>
-                      <input
-                        type="text"
-                        name="loadCapacity"
-                        value={formData.loadCapacity}
-                        onChange={handleChange}
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
-                      />
-                    </div>
-                  </div> */}
-                  {/* <div className="w-full lg:w-6/12 px-4">
-                    <div className="relative w-full mb-3">
-                      <label
-                        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                        htmlFor="material"
-                      >
-                        Material
-                      </label>
-                      <input
-                        type="text"
-                        name="material"
-                        value={formData.material}
-                        onChange={handleChange}
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
-                      />
-                    </div>
-                  </div> */}
                   <div className="w-full lg:w-6/12 px-4">
                     <div className="relative w-full mb-3">
                       <label
@@ -333,7 +348,6 @@ const AddProducts = ({ initialData = null }) => {
                         value={formData.category}
                         onChange={handleChange}
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
                       >
                         <option value="">Select a category</option>
                         {categoryList.map((cat) => (
@@ -344,42 +358,6 @@ const AddProducts = ({ initialData = null }) => {
                       </select>
                     </div>
                   </div>
-                  {/* <div className="w-full lg:w-6/12 px-4">
-                    <div className="relative w-full mb-3">
-                      <label
-                        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                        htmlFor="dimensions"
-                      >
-                        Dimensions
-                      </label>
-                      <input
-                        type="text"
-                        name="dimensions"
-                        value={formData.dimensions}
-                        onChange={handleChange}
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
-                      />
-                    </div>
-                  </div> */}
-                  {/* <div className="w-full lg:w-6/12 px-4">
-                    <div className="relative w-full mb-3">
-                      <label
-                        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                        htmlFor="type"
-                      >
-                        Type
-                      </label>
-                      <input
-                        type="text"
-                        name="type"
-                        value={formData.type}
-                        onChange={handleChange}
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
-                      />
-                    </div>
-                  </div> */}
                   <div className="w-full px-4">
                     <div className="relative w-full mb-3">
                       <label
@@ -394,72 +372,66 @@ const AddProducts = ({ initialData = null }) => {
                         onChange={handleChange}
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         rows="4"
-                        
                       ></textarea>
                     </div>
                   </div>
-                  {/* <div className="w-full lg:w-6/12 px-4">
-                    <div className="relative w-full mb-3">
-                      <label
-                        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                        htmlFor="color"
-                      >
-                        Color
-                      </label>
+                  <div className="w-full px-4">
+                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
+                      Custom Fields
+                    </label>
+                    <div className="flex mb-2">
                       <input
                         type="text"
-                        name="color"
-                        value={formData.color}
-                        onChange={handleChange}
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
+                        placeholder="Key"
+                        value={newCustomField.key}
+                        onChange={(e) =>
+                          setNewCustomField({
+                            ...newCustomField,
+                            key: e.target.value,
+                          })
+                        }
+                        className="mr-2 border px-2 py-1 rounded w-1/3"
                       />
+                      <input
+                        type="text"
+                        placeholder="Value"
+                        value={newCustomField.value}
+                        onChange={(e) =>
+                          setNewCustomField({
+                            ...newCustomField,
+                            value: e.target.value,
+                          })
+                        }
+                        className="mr-2 border px-2 py-1 rounded w-1/3"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomField}
+                        className="bg-sky-900 text-white px-3 py-1 rounded hover:bg-sky-800"
+                      >
+                        Add
+                      </button>
                     </div>
-                  </div> */}
-                  <div className="w-full px-4">
-  <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-    Custom Fields
-  </label>
-  <div className="flex mb-2">
-    <input
-      type="text"
-      placeholder="Key"
-      value={newCustomField.key}
-      onChange={(e) => setNewCustomField({ ...newCustomField, key: e.target.value })}
-      className="mr-2 border px-2 py-1 rounded w-1/3"
-    />
-    <input
-      type="text"
-      placeholder="Value"
-      value={newCustomField.value}
-      onChange={(e) => setNewCustomField({ ...newCustomField, value: e.target.value })}
-      className="mr-2 border px-2 py-1 rounded w-1/3"
-    />
-    <button
-      type="button"
-      onClick={handleAddCustomField}
-      className="bg-sky-900 text-white px-3 py-1 rounded hover:bg-sky-800"
-    >
-      Add
-    </button>
-  </div>
 
-  <ul className="bg-white rounded p-3 shadow-md">
-    {customFields.map((field, index) => (
-      <li key={index} className="flex justify-between items-center mb-2">
-        <span className="font-medium">{field.key}: </span>
-        <span>{field.value}</span>
-        <button
-          type="button"
-          onClick={() => handleRemoveCustomField(index)}
-          className="ml-3 text-red-500 hover:text-red-700"
-        >
-          <FontAwesomeIcon icon={faTrash} />
-        </button>
-      </li>
-    ))}
-  </ul>
-</div>
+                    <ul className="bg-white rounded p-3 shadow-md">
+                      {customFields.map((field, index) => (
+                        <li
+                          key={index}
+                          className="flex justify-between items-center mb-2"
+                        >
+                          <span className="font-medium">{field.key}: </span>
+                          <span>{field.value}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomField(index)}
+                            className="ml-3 text-red-500 hover:text-red-700"
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
                   <div className="w-full lg:w-6/12 px-4">
                     <div className="relative w-full mb-3">
@@ -474,8 +446,16 @@ const AddProducts = ({ initialData = null }) => {
                         name="mainImageFile"
                         onChange={handleChange}
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
                       />
+                      {formData.mainImagePreview && (
+                        <div className="mt-2">
+                          <img
+                            src={formData.mainImagePreview}
+                            alt="Main Product Preview"
+                            className="w-32 h-32 object-cover rounded"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="w-full lg:w-6/12 px-4">
@@ -492,45 +472,66 @@ const AddProducts = ({ initialData = null }) => {
                         onChange={handleChange}
                         multiple
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        
                       />
+                      {formData.otherImagePreviews.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {formData.otherImagePreviews.map((image, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={image}
+                                alt={`Other Product Preview ${index}`}
+                                className="w-32 h-32 object-cover rounded"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveOtherImage(index)}
+                                className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs"
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-center">
-                <button
-                  type="submit"
-                  className="bg-sky-900 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center">
-                      <svg
-                        className="animate-spin h-5 w-5 mr-3 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Submitting...
-                    </div>
-                  ) : (
-                    id ? "Update Product" : "Add Product"
-                  )}
-                </button>
+                  <button
+                    type="submit"
+                    className="bg-sky-900 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <svg
+                          className="animate-spin h-5 w-5 mr-3 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Submitting...
+                      </div>
+                    ) : id ? (
+                      "Update Product"
+                    ) : (
+                      "Add Product"
+                    )}
+                  </button>
                 </div>
               </form>
             </div>
