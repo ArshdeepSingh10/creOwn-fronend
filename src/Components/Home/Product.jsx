@@ -20,7 +20,7 @@ const Product = ({ companyInfo }) => {
   }, []);
 
   const handleProductClick = (category) => {
-    navigate(`/products/category/${category}`);
+    navigate(`/${uniqueName}/products/category/${category}`);
   };
 
   return (
