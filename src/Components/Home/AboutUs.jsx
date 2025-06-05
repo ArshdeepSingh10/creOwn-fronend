@@ -29,7 +29,7 @@ useEffect(()=>{
       try {
         const response = await axiosInstance.get(`/company/unique/${company}`);
        console.log(response)
-        setCompanyInfo(response.data);
+        setCompanyInfo(response.data.data);
       } catch (error) {
         console.error('Error fetching company info:', error);
       } finally {
